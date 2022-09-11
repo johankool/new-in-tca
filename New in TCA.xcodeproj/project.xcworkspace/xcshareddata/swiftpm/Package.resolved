@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "deckui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/joshdholtz/DeckUI.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "00f0f47aaf292de4a21cf993b266cd9f75441d32"
+      }
+    }
+  ],
+  "version" : 2
+}
