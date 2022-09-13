@@ -80,7 +80,7 @@ extension ContentView {
             struct State { … }
             enum Action {
               case factButtonTapped
-              case faceResponse(TaskResult<String>)
+              case factResponse(TaskResult<String>)
             }
             @Dependency(\.numberFact) var numberFact
 
@@ -94,7 +94,7 @@ extension ContentView {
                 case let .factResponse(.success(fact)):
                   // do something with fact
 
-                case let .factResponse(.failure(error)b):
+                case let .factResponse(.failure(error)):
                   // handle error
               }
             }
@@ -198,7 +198,13 @@ extension ContentView {
               
                 let client: Client
               
+                // either:
                 func reduce(into state: inout State, action: Action) -> Effect<Action, Never> {
+                  …
+                }
+              
+                // or:
+                var body: some ReducerProtocol<State, Action> {
                   …
                 }
               }
