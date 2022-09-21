@@ -6,7 +6,16 @@
       "location" : "https://github.com/joshdholtz/DeckUI.git",
       "state" : {
         "branch" : "main",
-        "revision" : "00f0f47aaf292de4a21cf993b266cd9f75441d32"
+        "revision" : "3cc7b967e88285951e940662af953d8b2e1aa606"
+      }
+    },
+    {
+      "identity" : "splash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/johnsundell/Splash.git",
+      "state" : {
+        "revision" : "7f4df436eb78fe64fe2c32c58006e9949fa28ad8",
+        "version" : "0.16.0"
       }
     }
   ],

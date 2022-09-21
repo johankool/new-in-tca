@@ -71,11 +71,11 @@ extension ContentView {
           Words(".fireAndForget")
         }
       }
-
+      
       Slide {
         Title("Effect.task", subtitle: "Emit one single action")
         
-        Code(#"""
+        Code(.swift) { #"""
           struct Feature: ReducerProtocol {
             struct State { … }
             enum Action {
@@ -83,29 +83,29 @@ extension ContentView {
               case factResponse(TaskResult<String>)
             }
             @Dependency(\.numberFact) var numberFact
-
+          
             func reduce(into state: inout State, action: Action) -> Effect<Action, Never> {
               switch action {
                 case .factButtonTapped:
                   return .task { [number = state.number] in
                     await .factResponse(TaskResult { try await self.numberFact.fetch(number) })
                   }
-
+          
                 case let .factResponse(.success(fact)):
                   // do something with fact
-
+          
                 case let .factResponse(.failure(error)):
                   // handle error
               }
             }
           }
-          """#)
+          """# }
       }
-
+      
       Slide {
         Title("Effect.run", subtitle: "Emit any number of actions")
         
-        Code(#"""
+        Code(.swift) { #"""
           struct LongLivingEffects: ReducerProtocol {
             struct State {
               var screenshotCount = 0
@@ -114,7 +114,7 @@ extension ContentView {
               case task
               case userDidTakeScreenshotNotification
             }
-
+          
             @Dependency(\.screenshots) var screenshots
             func reduce(into state: inout State, action: Action) -> Effect<Action, Never> {
               switch action {
@@ -131,10 +131,10 @@ extension ContentView {
               }
             }
           }
-
+          
           struct LongLivingEffectsView: View {
             let store: StoreOf<LongLivingEffects>
-
+          
             var body: some View {
               WithViewStore(self.store) { viewStore in
                 Text("Screenshots: \(viewStore.screenshotCount)")
@@ -142,16 +142,18 @@ extension ContentView {
               }
             }
           }
-          """#)
+          """# }
         // Cancelled when LongLivingEffectsView is not visible anymore.
       }
 
+        
+
       Slide {
         Title("Effect.fireAndForget", subtitle: "Emit no actions")
-        
-        Code(#"""
+
+        Code(.swift) { #"""
           @Dependency(\.analytics) var analytics
-          
+
           func reduce(into state: inout State, action: Action) -> Effect<Action, Never> {
             switch action {
             case .buttonTapped:
@@ -160,59 +162,59 @@ extension ContentView {
               }
             }
           }
-          """#)
-        
+          """# }
+
         // This effect is handy for executing some asynchronous work that your feature doesn't need to react to. One such example is analytics.
       }
 
       // MARK: Reducer Protocol
       Slide {
         Title("Introducing Reducer Protocol")
-        
+
         Columns {
           Column {
             Words("Old")
-            Code(#"""
+            Code(.swift) { #"""
               struct FeatureState { … }
-               
+
               enum FeatureAction { … }
-               
+
               struct FeatureEnvironment {
                 var client: Client
                 …
               }
-               
+
               let featureReducer = Reducer<FeatureState, FeatureAction, FeatureEnvironment> { state, action, environment in
                 …
               }
-              """#)
+              """# }
           }
-          
+
           Column {
             Words("New")
-            Code(#"""
+            Code(.swift) { #"""
               struct Feature: ReducerProtocol {
                 struct State { … }
-                
+
                 enum Action { … }
-              
+
                 let client: Client
-              
+
                 // either:
                 func reduce(into state: inout State, action: Action) -> Effect<Action, Never> {
                   …
                 }
-              
+
                 // or:
                 var body: some ReducerProtocol<State, Action> {
                   …
                 }
               }
-              """#)
+              """# }
           }
         }
       }
-      
+
 //      Slide {
 //        Title("Introducing Reducer Protocol")
 //
@@ -223,31 +225,31 @@ extension ContentView {
 //          Words("Far less strain on the compiler.")
 //        }
 //      }
-      
+
       // MARK: Composing Reducers
       Slide {
         Title("Composing Reducers", subtitle: "Merging and Scoping")
-        
+
         Columns {
           Column {
             Words("Old")
-            Code(#"""
+            Code(.swift) { #"""
               struct AppState {
                 var activity: Activity.State
                 var profile: Profile.State
                 var settings: Settings.State
               }
-              
+
               enum AppAction {
                 case activity(Activity.Action)
                 case profile(Profile.Action)
                 case settings(Settings.Action)
               }
-              
+
               struct AppEnvironment {
                 …
               }
-              
+
               let appReducer = Reducer<AppState, AppAction, AppEnvironment>.combine(
                 activityReducer
                   .pullback(
@@ -265,25 +267,25 @@ extension ContentView {
                     action: /AppAction.settings,
                     environment: { … })
               )
-              """#)
+              """# }
           }
-          
+
           Column {
             Words("New")
-            Code(#"""
+            Code(.swift) { #"""
               struct App: ReducerProtocol {
                 struct State {
                   var activity: Activity.State
                   var profile: Profile.State
                   var settings: Settings.State
                 }
-              
+
                 enum Action {
                   case activity(Activity.Action)
                   case profile(Profile.Action)
                   case settings(Settings.Action)
                 }
-              
+
                 var body: some ReducerProtocol<State, Action> {
                   Scope(state: \.activity, action: /Action.activity) {
                     Activity()
@@ -296,8 +298,8 @@ extension ContentView {
                   }
                 }
               }
-              """#)
-            
+              """# }
+
             //      ^ Things to note:
             //      - builder context of body automatically combines reducers together
             //      - pullback operator has been reimagined as a Scope reducer
@@ -306,10 +308,10 @@ extension ContentView {
           }
         }
       }
-      
+
       Slide {
         Title("Composing Reducers", subtitle: "Optional State")
-        Code(#"""
+        Code(.swift) { #"""
           struct App: ReducerProtocol {
             struct State {
               var activity: Activity.State
@@ -328,32 +330,32 @@ extension ContentView {
               }
             }
           }
-          """#)
-      
+          """# }
+
       //      ^ Order used to be important. Now impossible to have wrong order.
       }
-      
+
       // MARK: Injecting Dependencies
       Slide {
         Title("Injecting Dependencies")
-        
+
         Columns {
           Column {
             Words("Old")
-            Code(#"""
+            Code(.swift) { #"""
               struct FeatureEnvironment {
                 var apiClient: APIClient
                 var date: () -> Date
                 var mainQueue: AnySchedulerOf<DispatchQueue>
               }
-              
+
               struct ParentEnvironment {
                 var apiClient: APIClient
                 var date: () -> Date
                 var mainQueue: AnySchedulerOf<DispatchQueue>
                 var uuid: () -> UUID
               }
-              
+
               featureReducer
                 .pullback(
                   state: \.feature,
@@ -366,41 +368,41 @@ extension ContentView {
                     )
                   }
                 )
-              """#)
+              """# }
           }
-          
+
           Column {
             Words("New")
-            Code(#"""
+            Code(.swift) { #"""
               struct Feature: ReducerProtocol {
                 @Dependency(\.apiClient) var apiClient
                 @Dependency(\.date) var date
                 @Dependency(\.mainQueue) var mainQueue
               }
-              """#)
+              """# }
           }
         }
       }
-      
+
       Slide {
         Title("Injecting Custom Dependencies")
         Words("Domain specific dependencies need to define key:")
-        
-        Code(#"""
+
+        Code(.swift) { #"""
           private enum APIClientKey: LiveDependencyKey {
             static let liveValue = APIClient.live
             static let testValue = APIClient.unimplemented
           }
-          
+
           extension DependencyValues {
             var apiClient: APIClient {
               get { self[APIClientKey.self] }
               set { self[APIClientKey.self] = newValue }
             }
           }
-          """#)
+          """# }
       }
-    
+
       // MARK: Outro
 //      Slide {
 //        Title("Testability")
@@ -421,10 +423,10 @@ extension ContentView {
 //        Words("https://www.merowing.info/exhaustive-testing-in-tca/")
 //
 //      }
-      
+
       Slide {
         Title("Requirements")
-        
+
         Words("Runtime")
         Bullets(style: .bullet) {
           Words("iOS/iPadOS/tvOS 13")
@@ -432,7 +434,7 @@ extension ContentView {
           Words("watchOS 6")
         }
         Words("")
-        
+
         Words("Development*")
         Bullets(style: .bullet) {
           Words("Xcode 14")
@@ -440,7 +442,7 @@ extension ContentView {
         }
         Words("* for all fancy features")
       }
-      
+
       Slide {
         Title("Did you know?")
         Bullets(style: .bullet) {
@@ -452,23 +454,23 @@ extension ContentView {
           Words("frequently mistyping State as Sate makes me hungry")
         }
       }
-      
+
       Slide(alignment: .center) {
         Title("Questions?")
       }
-      
+
       Slide {
         Title("Relevant Links")
-        
+
         Words("Library:")
         Words("github.com/pointfreeco/swift-composable-architecture\n")
-        
+
         Words("Video series:")
         Words("www.pointfree.co\n")
-        
+
         Words("This presentation:")
         Words("github.com/johankool/new-in-tca\n")
-        
+
         Words("Presentation created with:")
         Words("github.com/joshdholtz/DeckUI")
       }
